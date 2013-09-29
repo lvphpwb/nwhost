@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html ng-app>
+    <head>
+        <title>HOST 管理工具</title>
+        <meta charset="UTF-8"/> 
+        <link href="css/main.css" rel="stylesheet">
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="lvjs/css/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="allwarp" ng-controller="domaindataController">
+            <div class="alert alert-info" id="addform">
+                <form class="form-inline" ng-submit="dealadd();">
+                    <input type="text" placeholder="域名" ng-model="domain">
+                    <input type="text" class="input-xxlarge" placeholder="IP地址" ng-model="ip">
+                    <button type="submit" class="btn btn-info">添加</button>
+                    <span class="label">多个绑定IP用,分开</span>
+                </form>
+            </div>
+            <div id="scrollparent">
+            <div id="domainlistdiv">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>域名</th>
+                        <th style=" text-align: center; width:120px;">绑定</th>
+                        <th style=" text-align: center; width:165px;">火狐-PROXY</th>
+                        <th style=" text-align: center; width:165px;">CHROME-PROXY</th>
+                        <th style=" text-align: center; width:165px;">IE-PROXY</th>
+                        <th style=" text-align: center; width:50px;">修改IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="domaindata in domainlist" style="vertical-align: middle;">
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn">{{domaindata.domain}}</button>
+                                <button class="btn deletedomain"><i class="icon-remove" title="删除域名" ng-click="deletedomain(this)"></i></button>
+                            </div>
+                        </td>
+                        <td style=" text-align: center;">
+                            <select style="width: 135px; margin-bottom: 0px;" ng-change="changebind()" ng-model="domaindata.bindip">
+                                <option value="">无绑定</option>
+                                <option ng-repeat="domainip in domaindata.ip" ng-selected="domainip==domaindata.bindip" value="{{domainip}}">{{domainip}}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <img src="images/ico_f.png"/>
+                            <select style="width: 135px; margin-bottom: 0px;" ng-change="changebind()" ng-model="domaindata.firefoxip">
+                                <option value="">无绑定</option>
+                                <option ng-repeat="domainip in domaindata.ip" ng-selected="domainip==domaindata.firefoxip" value="{{domainip}}">{{domainip}}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <img src="images/ico_c.png"/>
+                            <select style="width: 135px; margin-bottom: 0px;" ng-change="changebind()" ng-model="domaindata.chromeip">
+                                <option value="">无绑定</option>
+                                <option ng-repeat="domainip in domaindata.ip" ng-selected="domainip==domaindata.chromeip" value="{{domainip}}">{{domainip}}</option>
+                            </select>
+                        </td>
+                        <td>
+                            <img src="images/ico_i.png"/>
+                            <select style="width: 135px; margin-bottom: 0px;" ng-change="changebind()" ng-model="domaindata.ieip">
+                                <option value="">无绑定</option>
+                                <option ng-repeat="domainip in domaindata.ip" ng-selected="domainip==domaindata.ieip" value="{{domainip}}">{{domainip}}</option>
+                            </select>
+                        </td>
+                        <td style=" text-align: center;">
+                            <a class="btn btn-info" title="修改绑定IP" ng-click="editip(domaindata)"><i class="icon-edit icon-white"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+            </div>
+            <div id="editipmodal" class="modal hide fade" style="z-index:999999">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>修改绑定IP(一行一个)</h3>
+                </div>
+                <div class="modal-body">
+                    <textarea class="iplist" style="width:515px; height:200px; resize: none;"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="editdomain" value=""/> 
+                    <a class="btn btn-info" ng-click="dealedit()">保存</a>
+                </div>
+            </div>
+        </div>
+        <script src="js/jquery.1.7.2.js"></script>
+        <script src="lvjs/lvjs.js"></script>
+        <script src="js/angular.min.js"></script>
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script>
+            global.jQuery = $;
+            global.fs = require('fs');
+            
+            function domaindataController($scope){
+                $scope.conffile = "app/js/proxy.config.js";
+                $scope.domainlist = JSON.parse( global.fs.readFileSync( $scope.conffile ) );
+
+                $scope.trim = function(str){
+                    return str.replace(/(^\s*)|(\s*$)/g, "");
+                };
+                $scope.configsave = function(){
+                    console.log($scope.domainlist);
+                    global.fs.writeFileSync($scope.conffile, JSON.stringify( $scope.domainlist ) );
+                };
+                $scope.changebind = function(){ 
+                    console.log($scope.domainlist);
+                    $scope.configsave();
+                    jQuery.lvalert.success({msg : "修改绑定成功！", timeout : 1500, mask : 0});
+                };
+                $scope.deletedomain = function(obj){
+                    var domain = obj.domaindata.domain;
+                    delete($scope.domainlist[domain]);
+                    $scope.configsave();
+                    jQuery.lvalert.success({msg : "删除域名成功！", timeout : 1500, mask : 0});
+                };
+                $scope.editip = function(obj){
+                    console.log(obj);
+                    $('#editipmodal').find(".iplist").val(obj.ip.join("\r\n"));
+                    $('#editipmodal').find("#editdomain").val(obj.domain);
+                    $('#editipmodal').modal("show");
+                };
+                $scope.dealedit = function(){
+                    var domain = $('#editipmodal').find("#editdomain").val();
+                    var ipdata = $('#editipmodal').find(".iplist").val();
+                    if(ipdata.length == 0){
+                        jQuery.lvalert.error({msg : "IP不能为空！", timeout : 1500});
+                        return false;
+                    }
+                    var ip_arr = ipdata.split("\n");
+                    var ip_tmp = [];
+                    for(var i=0;i<ip_arr.length;i++){
+                        var tmp = $scope.trim(ip_arr[i]);
+                        if(tmp.length > 0){
+                            ip_tmp.push(tmp);
+                        }
+                    }
+                    if(ip_tmp.length == 0){
+                        jQuery.lvalert.error({msg : "IP不能为空！", timeout : 1500});
+                        return false;
+                    }
+                    $scope.domainlist[ domain ].ip = ip_tmp;
+                    $scope.configsave();
+                    $('#editipmodal').find("#editdomain").val('');
+                    $('#editipmodal').find(".iplist").val('');
+                    $('#editipmodal').modal("hide");
+                    $scope.setscroll(1000);
+                    jQuery.lvalert.success({msg : "修改成功！", timeout : 1500, mask : 0});
+                };
+                $scope.setscroll = function(timeout){
+                    setTimeout(function(){
+                        jQuery("#domainlistdiv").jscroll({W:"16px",Btn:{btn:false}});
+                    }, timeout);
+                };
+                $scope.dealadd = function(){
+                    if(typeof $scope.domain == "undefined" || $scope.domain.length == 0){
+                        jQuery.lvalert.error({msg : "请填写您要绑定的域名！", timeout : 1500});
+                        return false;
+                    }
+                    if(typeof $scope.ip == "undefined" || $scope.ip.length == 0){
+                        jQuery.lvalert.error({msg : "请填写您要绑定的IP地址！", timeout : 1500});
+                        return false;
+                    }
+                    if( $scope.domainlist[ $scope.domain ] ) {
+                        jQuery.lvalert.error({msg : "此域名已存在！", timeout : 1500});
+                        return false;
+                    }else{
+                        var ip_str = $scope.ip;
+                        if(ip_str.length>0){
+                            var ip_arr = [];
+                            var ip_tmp = ip_str.split(',');
+                            for(var i=0;i<ip_tmp.length;i++){
+                                if(ip_tmp[i].length>0){
+                                    ip_arr.push(ip_tmp[i]);
+                                }
+                            }
+                            $scope.domainlist[ $scope.domain ] = {ip: ip_arr, domain: $scope.domain};
+                        }else{
+                            $scope.domainlist[ $scope.domain ] = {domain: $scope.domain};
+                        }
+                        $scope.configsave();
+                        $scope.domain = '';
+                        $scope.ip = '';
+                        $scope.setscroll(1000);
+                        jQuery.lvalert.success({msg : "添加成功！", timeout : 1500, mask : 0});
+                        return false;
+                    }
+                }
+                $scope.setscroll(100);
+            }
+        </script>
+    </body>
+</html>
