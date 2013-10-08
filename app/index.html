@@ -18,10 +18,11 @@
         </div>
         <iframe id="frame" src="main.html"></iframe>
         <script src="js/jquery.1.7.2.js"></script>
+        <script src="js/conf.js"></script>
         <script src="js/angular.min.js"></script>
         <script>
             var tray;
-            //share main context
+
             var gui = require('nw.gui');
             global.gui = gui;
             global.mainWindow = gui.Window.get();
@@ -30,10 +31,13 @@
             var crypto = require('crypto');
             var conffile = "app/js/proxy.config.js";
 	        var exec = require('child_process').exec;
-            exec('call "'+process.cwd()+'/proxy.bat',function (error, stdout, stderr) {
+            exec('call "'+process.cwd()+'/proxy.bat', function (error, stdout, stderr) {
                 if (error !== null) {
                     console.log('exec error: ' + error);
                 }
+                exec('start "" "' + systempath + ':\\Program Files\\Internet Explorer\\iexplore.exe" "' + initurl + '"', function (error, stdout, stderr) {
+
+                });
             });
 
             var domainlist = {};
@@ -139,6 +143,9 @@
                         if (error !== null) {
                             console.log('exec error: ' + error);
                         }
+                        exec('start "" "' + systempath + ':\\Program Files\\Internet Explorer\\iexplore.exe" "' + initurl + '"', function (error, stdout, stderr) {
+
+                        });
                         global.mainWindow.close();
                     });
                 };

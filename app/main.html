@@ -35,7 +35,7 @@
                         <td>
                             <div class="btn-group">
                                 <button class="btn">{{domaindata.domain}}</button>
-                                <button class="btn deletedomain"><i class="icon-remove" title="删除域名" ng-click="deletedomain(this)"></i></button>
+                                <button class="btn deletedomain"><i class="icon-remove" title="删除域名" ng-click="deletedomain(domaindata)"></i></button>
                             </div>
                         </td>
                         <td style=" text-align: center;">
@@ -107,20 +107,18 @@
                     global.fs.writeFileSync($scope.conffile, JSON.stringify( $scope.domainlist ) );
                 };
                 $scope.changebind = function(){ 
-                    console.log($scope.domainlist);
                     $scope.configsave();
                     jQuery.lvalert.success({msg : "修改绑定成功！", timeout : 1500, mask : 0});
                 };
-                $scope.deletedomain = function(obj){
-                    var domain = obj.domaindata.domain;
+                $scope.deletedomain = function(domaindata){
+                    var domain = domaindata.domain;
                     delete($scope.domainlist[domain]);
                     $scope.configsave();
                     jQuery.lvalert.success({msg : "删除域名成功！", timeout : 1500, mask : 0});
                 };
-                $scope.editip = function(obj){
-                    console.log(obj);
-                    $('#editipmodal').find(".iplist").val(obj.ip.join("\r\n"));
-                    $('#editipmodal').find("#editdomain").val(obj.domain);
+                $scope.editip = function(domaindata){
+                    $('#editipmodal').find(".iplist").val(domaindata.ip.join("\r\n"));
+                    $('#editipmodal').find("#editdomain").val(domaindata.domain);
                     $('#editipmodal').modal("show");
                 };
                 $scope.dealedit = function(){
