@@ -35,9 +35,15 @@
                 if (error !== null) {
                     console.log('exec error: ' + error);
                 }
-                exec('start "" "' + systempath + ':\\Program Files\\Internet Explorer\\iexplore.exe" "' + initurl + '"', function (error, stdout, stderr) {
-
+                var iestart = exec('start /min "" "' + systempath + ':\\Program Files\\Internet Explorer\\iexplore.exe" "' + initurl + '"', function (error, stdout, stderr) {
+                    console.log(error,stdout,stderr);
                 });
+                //console.log(iestart);
+                setTimeout(function(){
+                    exec('taskkill /F /IM iexplore.exe', function (error, stdout, stderr) {
+
+                    });
+                }, 2000);
             });
 
             var domainlist = {};
@@ -143,10 +149,16 @@
                         if (error !== null) {
                             console.log('exec error: ' + error);
                         }
-                        exec('start "" "' + systempath + ':\\Program Files\\Internet Explorer\\iexplore.exe" "' + initurl + '"', function (error, stdout, stderr) {
+                        exec('start /min "" "' + systempath + ':\\Program Files\\Internet Explorer\\iexplore.exe" "' + initurl + '"', function (error, stdout, stderr) {
 
                         });
-                        global.mainWindow.close();
+                        global.mainWindow.hide();
+                        setTimeout(function(){
+                            exec('taskkill /F /IM iexplore.exe', function (error, stdout, stderr) {
+
+                            });
+                            global.mainWindow.close();
+                        }, 2000);
                     });
                 };
                 $scope.minwindow = function(){
